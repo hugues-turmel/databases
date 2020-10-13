@@ -1,0 +1,113 @@
+########################
+# -- > EXERCICE 4 < -- #
+########################
+
+CREATE DATABASE COURSE;
+
+CREATE TABLE COUREUR (idc INT PRIMARY KEY, nom VARCHAR(100) NOT NULL, prenom VARCHAR(100) NOT NULL, idclub INT, idcat INT, FOREIGN KEY (idclub) REFERENCES CLUB(idclub), FOREIGN KEY (idcat) REFERENCES CATEGORIE(idcat));
+
+CREATE TABLE CLUB (idclub INT PRIMARY KEY, nomClub VARCHAR(50) NOT NULL, sigle VARCHAR(10) NOT NULL);
+
+CREATE TABLE CATEGORIE (idcat INT PRIMARY KEY, nomCat VARCHAR(20) NOT NULL);
+
+CREATE TABLE EVENT(idev INT PRIMARY KEY, lieu VARCHAR(50) NOT NULL);
+
+INSERT INTO CLUB(idclub,nomClub,sigle) VALUES (1,'Union Sportive Orleans', 'USO');
+INSERT INTO CLUB(idclub,nomClub,sigle) VALUES (2,'Association Sportive MonCanape', 'ASM');
+
+INSERT INTO CATEGORIE(idcat,nomCat) VALUES (1,'Junior');
+INSERT INTO CATEGORIE(idcat,nomCat) VALUES (2,'Senior');
+
+INSERT INTO COUREUR(idc,nom,prenom,idclub,idcat) VALUES(1,'Jamin','Valerie',1,1),(2,'Martin','Remi',2,2),(3,'Jean Pierre','Fevrier',1,1);
+
+UPDATE COUREUR SET idclub=2 WHERE idc=1;
+UPDATE COUREUR SET idcat=2 WHERE idc=3;
+
+########################
+# -- > EXERCICE 5 < -- #
+########################
+
+SHOW TABLES;
+DESC SONDE;
+
+########################
+# -- > EXERCICE 6 < -- #
+########################
+
+# 1)
+
+SELECT nomPan 
+FROM PANEL NATURAL JOIN CONSTITUER NATURAL JOIN SONDE 
+WHERE nomSond='BOURIER' AND prenomSond='Caroline';
+
+# 2)
+
+SELECT DISTINCT nomPan 
+FROM PANEL NATURAL JOIN CONSTITUER NATURAL JOIN SONDE NATURAL JOIN CARACTERISTIQUE NATURAL JOIN TRANCHE 
+WHERE idTr=6;
+
+# 3)
+
+SELECT nomPan 
+FROM PANEL 
+WHERE idPan IN (SELECT idPan FROM CONSTITUER NATURAL JOIN SONDE NATURAL JOIN CARACTERISTIQUE NATURAL JOIN TRANCHE WHERE idTr=6);
+
+# 4)
+
+SELECT nomSond,prenomSond 
+FROM SONDE NATURAL JOIN CARACTERISTIQUE NATURAL JOIN TRANCHE NATURAL JOIN CATEGORIE
+WHERE intituleCat='Ouvriers' AND idTR=6;
+
+SELECT nomSond,prenomSond 
+FROM SONDE 
+WHERE idC IN (SELECT idC from CARACTERISTIQUE NATURAL JOIN CATEGORIE NATURAL JOIN TRANCHE  WHERE intitulecat ="Ouvriers" AND valDebut=70 AND valFin=120);
+
+# 5)
+
+SELECT nomSond,prenomSond 
+FROM SONDE NATURAL JOIN CARACTERISTIQUE NATURAL JOIN TRANCHE NATURAL JOIN CATEGORIE 
+WHERE intituleCat='Ouvriers' AND prenomSond='Olivier';
+
+SELECT nomSond,prenomSond 
+FROM SONDE 
+WHERE idC IN (SELECT idC from CARACTERISTIQUE NATURAL JOIN CATEGORIE WHERE intitulecat ="Ouvriers") AND prenomSond='Olivier';
+
+# 6)
+
+SELECT valDebut,valfin 
+FROM TRANCHE 
+WHERE idTR IN(SELECT idTR FROM CARACTERISTIQUE NATURAL JOIN SONDE WHERE MONTH(dateNaisSond)=4 AND DAY(dateNaisSond)=25 AND sexe='F');
+
+SELECT nomSond,prenomSond 
+FROM SONDE NATURAL JOIN CONSTITUER NATURAL JOIN PANEL 
+WHERE prenomSond='Jean'
+GROUP BY nomSond HAVING COUNT(nomSond)>1;
+
+########################
+# -- > EXERCICE 7 < -- #
+########################
+
+# 1)
+
+SELECT nomPan 
+FROM PANEL 
+WHERE idPan NOT IN (SELECT idPan FROM CONSTITUER NATURAL JOIN SONDE WHERE nomSond='DJARA' AND prenomSond='Louane');
+
+# 2)
+
+SELECT DISTINCT prenomSond 
+FROM SONDE 
+WHERE prenomSond NOT IN (SELECT prenomSond FROM SONDE NATURAL JOIN CARACTERISTIQUE NATURAL JOIN CATEGORIE NATURAL JOIN TRANCHE  WHERE valDebut=20 AND valFin=29) AND LEFT(prenomSond, 1)='A'
+ORDER BY prenomSond;
+
+########################
+# -- > EXERCICE 9 < -- #
+########################
+
+# 1)
+
+SELECT nomPan,COUNT(numSond) AS nbSond FROM SONDE NATURAL JOIN CONSTITUER NATURAL JOIN PANEL GROUP BY nomPan;
+
+# 2)
+
+SELECT intituleCat, ROUND(AVG(DATEDIFF(CURDATE(),dateNaisSond))/365,0) AS ageMoy FROM CATEGORIE NATURAL JOIN CARACTERISTIQUE NATURAL JOIN SONDE GROUP BY intituleCat;
